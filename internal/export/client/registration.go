@@ -17,6 +17,7 @@ import (
 	"github.com/go-zoo/bone"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 const (
@@ -298,4 +299,54 @@ func notifyUpdatedRegistrations(update models.NotifyUpdate) {
 			LoggingClient.Error(fmt.Sprintf("error from distro: %s", err.Error()))
 		}
 	}()
+}
+
+func getMimicTable(w http.ResponseWriter, r *http.Request) {
+	regs, err := dbClient.Registrations()
+	if err != nil {
+		LoggingClient.Error(fmt.Sprintf("Failed to query all registrations. Error: %s", err.Error()))
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	//var mimic_map map[string]string = map[string]string{}
+	var build strings.Builder
+	build.WriteString("[")
+	for _,reg := range regs {
+		var RegAddr = reg.Addressable
+		var Device string
+		for _,DeviceID := range reg.Filter.DeviceIDs {
+			Device = DeviceID
+		}
+		LoggingClient.Info(fmt.Sprintf("Device is : %s", Device))
+		LoggingClient.Info(fmt.Sprintf("Reg Address is : %s.  Reg Port is : %d", RegAddr.Address, RegAddr.Port))
+
+		var regaddress = fmt.Sprintf("%s:%d", RegAddr.Address, RegAddr.Port)
+
+		if "" != Device && "" != regaddress {
+			//var deviceValue = RegAddr.address + strconv.Itoa(RegAddr.Port)
+			//mimic_map[Device] = deviceValue
+			//mimicvalue += "{\"device\":\"" + Device
+			build.WriteString("{\"device\":\"")
+			build.WriteString(Device)
+			build.WriteString("\",\"address\":\"")
+			build.WriteString(regaddress)
+			build.WriteString("\"},")
+		}
+	}
+	str_mimic := build.String()
+
+	//strings.Replace(url,".html","",-1)
+	str_mimic = strings.TrimSuffix(str_mimic, ",")
+    str_mimic += "]"
+	LoggingClient.Info(fmt.Sprintf("str_mimic is : %s", str_mimic))
+
+	var mimicTable []export.MimicTable
+	 errMar := json.Unmarshal([]byte (str_mimic), &mimicTable)
+	 if errMar != nil {
+		 LoggingClient.Error("Unmarshal mimicTable error")
+	}
+
+	w.Header().Set("Content-Type", applicationJson)
+	json.NewEncoder(w).Encode(&mimicTable)
 }

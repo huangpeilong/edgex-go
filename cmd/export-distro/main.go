@@ -49,6 +49,7 @@ func main() {
 
 	distro.LoggingClient.Info("Service dependencies resolved...")
 	distro.LoggingClient.Info(fmt.Sprintf("Starting %s %s ", internal.ExportDistroServiceKey, edgex.Version))
+	distro.LoggingClient.Info("Service dependencies resolveaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 
 	http.TimeoutHandler(nil, time.Millisecond*time.Duration(distro.Configuration.Service.Timeout), "Request timed out")
 	distro.LoggingClient.Info(distro.Configuration.Service.StartupMsg, "")

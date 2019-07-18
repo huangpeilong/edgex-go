@@ -127,3 +127,8 @@ func (reg Registration) Validate() (bool, error) {
 
 	return true, nil
 }
+
+type MimicTable struct {
+	Device  string       `json:"device,omitempty"`
+	Address string       `json:"address,omitempty"`
+}

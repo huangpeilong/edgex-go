@@ -20,6 +20,7 @@ import (
 
 const (
 	apiV1Registration = "/api/v1/registration"
+	apiVMimicTable = "/api/v1/mimic_table"
 )
 
 func replyPing(w http.ResponseWriter, r *http.Request) {
@@ -101,6 +102,8 @@ func httpServer() http.Handler {
 	mux.Put(apiV1Registration, http.HandlerFunc(updateReg))
 	mux.Delete(apiV1Registration+"/id/:id", http.HandlerFunc(delRegByID))
 	mux.Delete(apiV1Registration+"/name/:name", http.HandlerFunc(delRegByName))
+
+	mux.Get(apiVMimicTable, http.HandlerFunc(getMimicTable))
 
 	return mux
 }
